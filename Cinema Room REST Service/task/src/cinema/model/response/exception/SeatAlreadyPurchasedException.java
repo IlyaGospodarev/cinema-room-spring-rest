@@ -1,4 +1,4 @@
-package cinema.exception.custom;
+package cinema.model.response.exception;
 
 public class SeatAlreadyPurchasedException extends RuntimeException{
     public SeatAlreadyPurchasedException() {

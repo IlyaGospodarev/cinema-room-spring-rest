@@ -435,290 +435,6 @@ files:
         }
     }
   learner_created: true
-- name: src/cinema/dto/ReturnedTicket.java
-  visible: true
-  text: |
-    package cinema.dto;
-
-    import cinema.model.Seat;
-    import com.fasterxml.jackson.annotation.JsonProperty;
-
-    public class ReturnedTicket {
-        @JsonProperty("returned_ticket")
-        Seat returnedTicket;
-
-        public ReturnedTicket(Seat returnedTicket) {
-            this.returnedTicket = returnedTicket;
-        }
-
-        public Seat getReturnedTicket() {
-            return returnedTicket;
-        }
-
-        public void setReturnedTicket(Seat returnedTicket) {
-            this.returnedTicket = returnedTicket;
-        }
-    }
-  learner_created: true
-- name: src/cinema/dto/Token.java
-  visible: true
-  text: |
-    package cinema.dto;
-
-    import java.util.UUID;
-
-    public class Token {
-        UUID token;
-
-        public Token() {}
-
-        public Token(UUID token) {
-            this.token = token;
-        }
-
-        public UUID getToken() {
-            return token;
-        }
-
-        public void setToken(String token) {
-            this.token = UUID.fromString(token);
-        }
-    }
-  learner_created: true
-- name: src/cinema/dto/ErrorResponse.java
-  visible: true
-  text: |
-    package cinema.dto;
-
-    public class ErrorResponse {
-        String error;
-
-        public ErrorResponse(String error) {
-            this.error = error;
-        }
-
-        public String getError() {
-            return error;
-        }
-
-        public void setError(String error) {
-            this.error = error;
-        }
-    }
-  learner_created: true
-- name: src/cinema/exception/GlobalExceptionHandler.java
-  visible: true
-  text: |
-    package cinema.exception;
-
-    import cinema.dto.ErrorResponse;
-    import cinema.exception.custom.InvalidTokenException;
-    import cinema.exception.custom.SeatAlreadyPurchasedException;
-    import cinema.exception.custom.SeatNumberOutOfBoundException;
-    import org.springframework.http.ResponseEntity;
-    import org.springframework.web.bind.annotation.ExceptionHandler;
-    import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-    @RestControllerAdvice
-    public class GlobalExceptionHandler {
-        @ExceptionHandler
-        public ResponseEntity<?> handleSeatAlreadyBookedException(SeatAlreadyPurchasedException exception) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(exception.getMessage()));
-        }
-
-        @ExceptionHandler
-        public ResponseEntity<?> handleSeatNumberOutOfBoundException(SeatNumberOutOfBoundException exception) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(exception.getMessage()));
-        }
-
-        @ExceptionHandler
-        public ResponseEntity<?> handleInvalidTokenException(InvalidTokenException exception) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(exception.getMessage()));
-        }
-    }
-  learner_created: true
-- name: src/cinema/util/SeatMapper.java
-  visible: true
-  text: |
-    package cinema.util;
-
-    import cinema.model.Seat;
-    import cinema.dto.SeatDto;
-    import org.springframework.beans.factory.annotation.Value;
-    import org.springframework.stereotype.Component;
-
-    @Component
-    public class SeatMapper {
-        @Value("${low-price}")
-        private int lowPrice;
-        @Value("${high-price}")
-        private int highPrice;
-        @Value("${price-switch-row}")
-        private int priceSwitchRow;
-
-        public Seat asSeat(SeatDto dto) {
-            int row = dto.getRow();
-            int column = dto.getColumn();
-            int price = row < priceSwitchRow ? highPrice : lowPrice;
-            return new Seat(row, column, price);
-        }
-
-        public Seat creatSeat(int row, int column){
-            int price = row < priceSwitchRow ? highPrice : lowPrice;
-            return new Seat(row, column, price);
-        }
-    }
-  learner_created: true
-- name: src/cinema/model/CinemaRoom.java
-  visible: true
-  text: |
-    package cinema.model;
-
-    import cinema.util.SeatMapper;
-    import com.fasterxml.jackson.annotation.JsonIgnore;
-    import com.fasterxml.jackson.annotation.JsonProperty;
-    import org.springframework.beans.factory.annotation.Autowired;
-    import org.springframework.beans.factory.annotation.Value;
-    import org.springframework.stereotype.Component;
-
-    import javax.annotation.PostConstruct;
-    import java.util.*;
-
-    @Component
-    public class CinemaRoom {
-        @Value("${cinema-rows}")
-        @JsonProperty("total_rows")
-        private int totalRows;
-        @Value("${cinema-columns}")
-        @JsonProperty("total_columns")
-        private int totalColumns;
-        @JsonProperty("available_seats")
-        private final List<Seat> availableSeats;
-        @JsonIgnore
-        private final Map<UUID, Seat> purchasedSeats;
-        @JsonIgnore
-        private final SeatMapper seatMapper;
-
-        @Autowired
-        public CinemaRoom(SeatMapper seatMapper) {
-            this.availableSeats = new ArrayList<>();
-            this.purchasedSeats = new HashMap<>();
-            this.seatMapper = seatMapper;
-        }
-
-        public int getTotalRows() {
-            return totalRows;
-        }
-
-        public int getTotalColumns() {
-            return totalColumns;
-        }
-
-        public List<Seat> getAvailableSeats() {
-            return availableSeats;
-        }
-
-        public Map<UUID, Seat> getPurchasedSeats() {
-            return purchasedSeats;
-        }
-
-        public boolean isSeatAvailable(Seat seat) {
-            return availableSeats.contains(seat);
-        }
-
-        @PostConstruct
-        private void init() {
-            for (int row = 1; row <= totalRows; row++) {
-                for (int column = 1; column <= totalRows; column++) {
-                    Seat seat = seatMapper.creatSeat(row, column);
-                    availableSeats.add(seat);
-                }
-            }
-        }
-    }
-  learner_created: true
-- name: src/cinema/dto/PurchasedTicket.java
-  visible: true
-  text: |
-    package cinema.dto;
-
-    import cinema.model.Seat;
-
-    import java.util.UUID;
-
-    public class PurchasedTicket {
-        UUID token;
-        Seat ticket;
-
-        public PurchasedTicket(UUID token, Seat ticket) {
-            this.token = token;
-            this.ticket = ticket;
-        }
-
-        public UUID getToken() {
-            return token;
-        }
-
-        public void setToken(UUID token) {
-            this.token = token;
-        }
-
-        public Seat getTicket() {
-            return ticket;
-        }
-
-        public void setTicket(Seat ticket) {
-            this.ticket = ticket;
-        }
-    }
-  learner_created: true
-- name: src/cinema/dto/SeatDto.java
-  visible: true
-  text: |
-    package cinema.dto;
-
-    public class SeatDto {
-        int row;
-        int column;
-
-        public SeatDto() {}
-
-        public SeatDto(int row, int column) {
-            this.row = row;
-            this.column = column;
-        }
-
-        public int getRow() {
-            return row;
-        }
-
-        public int getColumn() {
-            return column;
-        }
-    }
-  learner_created: true
-- name: src/cinema/exception/custom/SeatNumberOutOfBoundException.java
-  visible: true
-  text: |
-    package cinema.exception.custom;
-
-    public class SeatNumberOutOfBoundException extends RuntimeException {
-        public SeatNumberOutOfBoundException() {
-            super("The number of a row or a column is out of bounds!");
-        }
-    }
-  learner_created: true
-- name: src/cinema/exception/custom/SeatAlreadyPurchasedException.java
-  visible: true
-  text: |
-    package cinema.exception.custom;
-
-    public class SeatAlreadyPurchasedException extends RuntimeException{
-        public SeatAlreadyPurchasedException() {
-            super("The ticket has been already purchased!");
-        }
-    }
-  learner_created: true
 - name: src/cinema/controller/CinemaController.java
   visible: true
   text: |
@@ -835,7 +551,189 @@ files:
         }
     }
   learner_created: true
-- name: src/cinema/exception/custom/InvalidTokenException.java
+- name: src/cinema/service/mapper/SeatMapper.java
+  visible: true
+  text: |
+    package cinema.util;
+
+    import cinema.model.Seat;
+    import cinema.dto.SeatDto;
+    import org.springframework.beans.factory.annotation.Value;
+    import org.springframework.stereotype.Component;
+
+    @Component
+    public class SeatMapper {
+        @Value("${low-price}")
+        private int lowPrice;
+        @Value("${high-price}")
+        private int highPrice;
+        @Value("${price-switch-row}")
+        private int priceSwitchRow;
+
+        public Seat asSeat(SeatDto dto) {
+            int row = dto.getRow();
+            int column = dto.getColumn();
+            int price = row < priceSwitchRow ? highPrice : lowPrice;
+            return new Seat(row, column, price);
+        }
+
+        public Seat creatSeat(int row, int column){
+            int price = row < priceSwitchRow ? highPrice : lowPrice;
+            return new Seat(row, column, price);
+        }
+    }
+  learner_created: true
+- name: src/cinema/model/response/TicketRefundResponse.java
+  visible: true
+  text: |
+    package cinema.dto;
+
+    import cinema.model.Seat;
+    import com.fasterxml.jackson.annotation.JsonProperty;
+
+    public class ReturnedTicket {
+        @JsonProperty("returned_ticket")
+        Seat returnedTicket;
+
+        public ReturnedTicket(Seat returnedTicket) {
+            this.returnedTicket = returnedTicket;
+        }
+
+        public Seat getReturnedTicket() {
+            return returnedTicket;
+        }
+
+        public void setReturnedTicket(Seat returnedTicket) {
+            this.returnedTicket = returnedTicket;
+        }
+    }
+  learner_created: true
+- name: src/cinema/model/response/TicketReservationResponse.java
+  visible: true
+  text: |
+    package cinema.dto;
+
+    import cinema.model.Seat;
+
+    import java.util.UUID;
+
+    public class PurchasedTicket {
+        UUID token;
+        Seat ticket;
+
+        public PurchasedTicket(UUID token, Seat ticket) {
+            this.token = token;
+            this.ticket = ticket;
+        }
+
+        public UUID getToken() {
+            return token;
+        }
+
+        public void setToken(UUID token) {
+            this.token = token;
+        }
+
+        public Seat getTicket() {
+            return ticket;
+        }
+
+        public void setTicket(Seat ticket) {
+            this.ticket = ticket;
+        }
+    }
+  learner_created: true
+- name: src/cinema/service/StatisticsService.java
+  visible: true
+  learner_created: true
+- name: src/cinema/model/response/StatisticsResponse.java
+  visible: true
+  learner_created: true
+- name: src/cinema/model/request/SeatDto.java
+  visible: true
+  text: |
+    package cinema.dto;
+
+    public class SeatDto {
+        int row;
+        int column;
+
+        public SeatDto() {}
+
+        public SeatDto(int row, int column) {
+            this.row = row;
+            this.column = column;
+        }
+
+        public int getRow() {
+            return row;
+        }
+
+        public int getColumn() {
+            return column;
+        }
+    }
+  learner_created: true
+- name: src/cinema/model/request/Token.java
+  visible: true
+  text: |
+    package cinema.dto;
+
+    import java.util.UUID;
+
+    public class Token {
+        UUID token;
+
+        public Token() {}
+
+        public Token(UUID token) {
+            this.token = token;
+        }
+
+        public UUID getToken() {
+            return token;
+        }
+
+        public void setToken(String token) {
+            this.token = UUID.fromString(token);
+        }
+    }
+  learner_created: true
+- name: src/cinema/controller/GlobalExceptionHandler.java
+  visible: true
+  text: |
+    package cinema.exception;
+
+    import cinema.dto.ErrorResponse;
+    import cinema.exception.custom.InvalidTokenException;
+    import cinema.exception.custom.SeatAlreadyPurchasedException;
+    import cinema.exception.custom.SeatNumberOutOfBoundException;
+    import org.springframework.http.ResponseEntity;
+    import org.springframework.web.bind.annotation.ExceptionHandler;
+    import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+    @RestControllerAdvice
+    public class GlobalExceptionHandler {
+        @ExceptionHandler
+        public ResponseEntity<?> handleSeatAlreadyBookedException(SeatAlreadyPurchasedException exception) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(exception.getMessage()));
+        }
+
+        @ExceptionHandler
+        public ResponseEntity<?> handleSeatNumberOutOfBoundException(SeatNumberOutOfBoundException exception) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(exception.getMessage()));
+        }
+
+        @ExceptionHandler
+        public ResponseEntity<?> handleInvalidTokenException(InvalidTokenException exception) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(exception.getMessage()));
+        }
+    }
+  learner_created: true
+- name: src/cinema/model/response/exception/InvalidPasswordException.java
+  visible: true
+  learner_created: true
+- name: src/cinema/model/response/exception/InvalidTokenException.java
   visible: true
   text: |
     package cinema.exception.custom;
@@ -846,11 +744,116 @@ files:
         }
     }
   learner_created: true
-- name: src/cinema/exception/custom/InvalidPasswordException.java
+- name: src/cinema/model/response/exception/SeatNumberOutOfBoundException.java
   visible: true
+  text: |
+    package cinema.exception.custom;
+
+    public class SeatNumberOutOfBoundException extends RuntimeException {
+        public SeatNumberOutOfBoundException() {
+            super("The number of a row or a column is out of bounds!");
+        }
+    }
   learner_created: true
-- name: src/cinema/model/Statistic.java
+- name: src/cinema/model/response/exception/SeatAlreadyPurchasedException.java
   visible: true
+  text: |
+    package cinema.exception.custom;
+
+    public class SeatAlreadyPurchasedException extends RuntimeException{
+        public SeatAlreadyPurchasedException() {
+            super("The ticket has been already purchased!");
+        }
+    }
+  learner_created: true
+- name: src/cinema/model/response/exception/ErrorResponse.java
+  visible: true
+  text: |
+    package cinema.dto;
+
+    public class ErrorResponse {
+        String error;
+
+        public ErrorResponse(String error) {
+            this.error = error;
+        }
+
+        public String getError() {
+            return error;
+        }
+
+        public void setError(String error) {
+            this.error = error;
+        }
+    }
+  learner_created: true
+- name: src/cinema/repository/CinemaRoomRepository.java
+  visible: true
+  text: |
+    package cinema.model;
+
+    import cinema.util.SeatMapper;
+    import com.fasterxml.jackson.annotation.JsonIgnore;
+    import com.fasterxml.jackson.annotation.JsonProperty;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.beans.factory.annotation.Value;
+    import org.springframework.stereotype.Component;
+
+    import javax.annotation.PostConstruct;
+    import java.util.*;
+
+    @Component
+    public class CinemaRoom {
+        @Value("${cinema-rows}")
+        @JsonProperty("total_rows")
+        private int totalRows;
+        @Value("${cinema-columns}")
+        @JsonProperty("total_columns")
+        private int totalColumns;
+        @JsonProperty("available_seats")
+        private final List<Seat> availableSeats;
+        @JsonIgnore
+        private final Map<UUID, Seat> purchasedSeats;
+        @JsonIgnore
+        private final SeatMapper seatMapper;
+
+        @Autowired
+        public CinemaRoom(SeatMapper seatMapper) {
+            this.availableSeats = new ArrayList<>();
+            this.purchasedSeats = new HashMap<>();
+            this.seatMapper = seatMapper;
+        }
+
+        public int getTotalRows() {
+            return totalRows;
+        }
+
+        public int getTotalColumns() {
+            return totalColumns;
+        }
+
+        public List<Seat> getAvailableSeats() {
+            return availableSeats;
+        }
+
+        public Map<UUID, Seat> getPurchasedSeats() {
+            return purchasedSeats;
+        }
+
+        public boolean isSeatAvailable(Seat seat) {
+            return availableSeats.contains(seat);
+        }
+
+        @PostConstruct
+        private void init() {
+            for (int row = 1; row <= totalRows; row++) {
+                for (int column = 1; column <= totalRows; column++) {
+                    Seat seat = seatMapper.creatSeat(row, column);
+                    availableSeats.add(seat);
+                }
+            }
+        }
+    }
   learner_created: true
 feedback_link: https://hyperskill.org/learn/step/13378#comment
 status: Solved

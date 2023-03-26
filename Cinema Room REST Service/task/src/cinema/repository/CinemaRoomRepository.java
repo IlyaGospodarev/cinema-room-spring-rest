@@ -1,6 +1,7 @@
-package cinema.model;
+package cinema.repository;
 
-import cinema.util.SeatMapper;
+import cinema.model.Seat;
+import cinema.service.mapper.SeatMapper;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,22 +12,27 @@ import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Component
-public class CinemaRoom {
+public class CinemaRoomRepository {
+
     @Value("${cinema-rows}")
     @JsonProperty("total_rows")
     private int totalRows;
+
     @Value("${cinema-columns}")
     @JsonProperty("total_columns")
     private int totalColumns;
+
     @JsonProperty("available_seats")
     private final List<Seat> availableSeats;
+
     @JsonIgnore
     private final Map<UUID, Seat> purchasedSeats;
+
     @JsonIgnore
     private final SeatMapper seatMapper;
 
     @Autowired
-    public CinemaRoom(SeatMapper seatMapper) {
+    public CinemaRoomRepository(SeatMapper seatMapper) {
         this.availableSeats = new ArrayList<>();
         this.purchasedSeats = new HashMap<>();
         this.seatMapper = seatMapper;

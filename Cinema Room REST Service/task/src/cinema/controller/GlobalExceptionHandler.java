@@ -1,10 +1,10 @@
-package cinema.exception;
+package cinema.controller;
 
-import cinema.dto.ErrorResponse;
-import cinema.exception.custom.InvalidPasswordException;
-import cinema.exception.custom.InvalidTokenException;
-import cinema.exception.custom.SeatAlreadyPurchasedException;
-import cinema.exception.custom.SeatNumberOutOfBoundException;
+import cinema.model.response.exception.ErrorResponse;
+import cinema.model.response.exception.InvalidPasswordException;
+import cinema.model.response.exception.InvalidTokenException;
+import cinema.model.response.exception.SeatAlreadyPurchasedException;
+import cinema.model.response.exception.SeatNumberOutOfBoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
     @ExceptionHandler
     public ResponseEntity<?> handleSeatAlreadyBookedException(SeatAlreadyPurchasedException exception) {
         return ResponseEntity.badRequest().body(new ErrorResponse(exception.getMessage()));
