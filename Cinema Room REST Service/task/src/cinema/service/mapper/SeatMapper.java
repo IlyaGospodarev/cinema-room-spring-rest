@@ -1,7 +1,7 @@
-package cinema.util;
+package cinema.service.mapper;
 
 import cinema.model.Seat;
-import cinema.dto.SeatDto;
+import cinema.model.request.SeatDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +15,8 @@ public class SeatMapper {
     private int priceSwitchRow;
 
     public Seat asSeat(SeatDto dto) {
-        int row = dto.getRow();
-        int column = dto.getColumn();
+        int row = dto.row();
+        int column = dto.column();
         int price = row < priceSwitchRow ? highPrice : lowPrice;
         return new Seat(row, column, price);
     }

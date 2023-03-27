@@ -1,10 +1,10 @@
-package cinema.exception;
+package cinema.controller;
 
-import cinema.dto.ErrorResponse;
-import cinema.exception.custom.InvalidPasswordException;
-import cinema.exception.custom.InvalidTokenException;
-import cinema.exception.custom.SeatAlreadyPurchasedException;
-import cinema.exception.custom.SeatNumberOutOfBoundException;
+import cinema.model.response.exeption.ErrorResponse;
+import cinema.model.response.exeption.InvalidPasswordException;
+import cinema.model.response.exeption.InvalidTokenException;
+import cinema.model.response.exeption.SeatAlreadyPurchasedException;
+import cinema.model.response.exeption.SeatNumberOutOfBoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

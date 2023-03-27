@@ -1,15 +1,16 @@
 package cinema.controller;
 
-import cinema.dto.PurchasedTicket;
-import cinema.dto.ReturnedTicket;
-import cinema.dto.SeatDto;
-import cinema.dto.Token;
-import cinema.exception.custom.InvalidPasswordException;
-import cinema.model.CinemaRoom;
+import cinema.model.response.StatisticsResponse;
+import cinema.model.response.TicketReservationResponse;
+import cinema.model.response.TicketRefundResponse;
+import cinema.model.request.SeatDto;
+import cinema.model.request.Token;
+import cinema.model.response.exeption.InvalidPasswordException;
+import cinema.repository.CinemaRoomRepository;
 import cinema.model.Seat;
-import cinema.model.Statistic;
+import cinema.service.StatisticService;
 import cinema.service.CinemaService;
-import cinema.util.SeatMapper;
+import cinema.service.mapper.SeatMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,36 +22,36 @@ public class CinemaController {
     private String secret;
     private final CinemaService cinemaService;
     private final SeatMapper seatMapper;
-    private final Statistic statistic;
+    private final StatisticService statisticService;
 
-    public CinemaController(CinemaService cinemaService, SeatMapper seatMapper, Statistic statistic) {
+    public CinemaController(CinemaService cinemaService, SeatMapper seatMapper, StatisticService statisticService) {
         this.cinemaService = cinemaService;
         this.seatMapper = seatMapper;
-        this.statistic = statistic;
+        this.statisticService = statisticService;
     }
 
     @GetMapping("/seats")
-    public CinemaRoom seats() {
+    public CinemaRoomRepository seats() {
         return cinemaService.getSeats();
     }
 
     @PostMapping("/purchase")
-    public PurchasedTicket purchase(@RequestBody SeatDto seatDto) {
+    public TicketReservationResponse purchase(@RequestBody SeatDto seatDto) {
         Seat seat = seatMapper.asSeat(seatDto);
         UUID uuid = cinemaService.purchaseSeat(seatDto);
-        return new PurchasedTicket(uuid, seat);
+        return new TicketReservationResponse(uuid, seat);
     }
 
     @PostMapping("/return")
-    public ReturnedTicket returned(@RequestBody Token token) {
-        Seat seat = cinemaService.refundTicket(token.getToken());
-        return new ReturnedTicket(seat);
+    public TicketRefundResponse returned(@RequestBody Token token) {
+        Seat seat = cinemaService.refundTicket(token.token());
+        return new TicketRefundResponse(seat);
     }
 
     @PostMapping("/stats")
-    public Statistic stats(@RequestParam(required = false) String password) {
+    public StatisticsResponse stats(@RequestParam(required = false) String password) {
         if (password != null && password.equals(secret)) {
-            return statistic;
+            return statisticService.getStatistics();
         }
         throw new InvalidPasswordException();
     }

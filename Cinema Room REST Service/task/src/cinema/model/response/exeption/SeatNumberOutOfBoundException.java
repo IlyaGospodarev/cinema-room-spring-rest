@@ -1,4 +1,4 @@
-package cinema.exception.custom;
+package cinema.model.response.exeption;
 
 public class SeatNumberOutOfBoundException extends RuntimeException {
     public SeatNumberOutOfBoundException() {

@@ -3,7 +3,7 @@ hyperskill_project:
   ide_files: https://stepik.org/media/attachments/lesson/539847/additional_files.json
   is_template_based: false
   use_ide: true
-update_date: "Wed, 15 Mar 2023 16:56:17 UTC"
+update_date: "Mon, 27 Mar 2023 10:18:09 UTC"
 stages:
 - id: 945
   step: 13375
@@ -189,14 +189,14 @@ topics:
     theory_id: 5076
   - title: External resources
     theory_id: 6216
+  - title: Web development
+    theory_id: 13931
   - title: Pseudocode
     theory_id: 15090
   - title: Pseudocode basics
     theory_id: 19510
   - title: Complex constructions in pseudocode
     theory_id: 20922
-  - title: Web development
-    theory_id: 13931
   - title: Libraries
     theory_id: 8504
   - title: Frameworks

@@ -1,28 +1,28 @@
 package cinema.service;
 
-import cinema.dto.SeatDto;
-import cinema.exception.custom.InvalidTokenException;
-import cinema.exception.custom.SeatAlreadyPurchasedException;
-import cinema.exception.custom.SeatNumberOutOfBoundException;
-import cinema.model.CinemaRoom;
+import cinema.model.request.SeatDto;
+import cinema.model.response.exeption.InvalidTokenException;
+import cinema.model.response.exeption.SeatAlreadyPurchasedException;
+import cinema.model.response.exeption.SeatNumberOutOfBoundException;
+import cinema.repository.CinemaRoomRepository;
 import cinema.model.Seat;
-import cinema.util.SeatMapper;
+import cinema.service.mapper.SeatMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
 public class CinemaService {
-    private final CinemaRoom cinemaRoom;
+    private final CinemaRoomRepository cinemaRoomRepository;
     private final SeatMapper seatMapper;
 
-    public CinemaService(CinemaRoom cinemaRoom, SeatMapper seatMapper) {
-        this.cinemaRoom = cinemaRoom;
+    public CinemaService(CinemaRoomRepository cinemaRoomRepository, SeatMapper seatMapper) {
+        this.cinemaRoomRepository = cinemaRoomRepository;
         this.seatMapper = seatMapper;
     }
 
-    public CinemaRoom getSeats() {
-        return cinemaRoom;
+    public CinemaRoomRepository getSeats() {
+        return cinemaRoomRepository;
     }
 
     public UUID purchaseSeat(SeatDto seatDto) {
@@ -33,31 +33,31 @@ public class CinemaService {
             throw new SeatNumberOutOfBoundException();
         }
 
-        if (!cinemaRoom.isSeatAvailable(seat)) {
+        if (!cinemaRoomRepository.isSeatAvailable(seat)) {
             throw new SeatAlreadyPurchasedException();
         }
 
         UUID uuid = UUID.randomUUID();
-        cinemaRoom.getPurchasedSeats().put(uuid, seat);
-        cinemaRoom.getAvailableSeats().remove(seat);
+        cinemaRoomRepository.getPurchasedSeats().put(uuid, seat);
+        cinemaRoomRepository.getAvailableSeats().remove(seat);
         return uuid;
     }
 
     public Seat refundTicket(UUID uuid) {
-        Seat seat = cinemaRoom.getPurchasedSeats().remove(uuid);
+        Seat seat = cinemaRoomRepository.getPurchasedSeats().remove(uuid);
 
         if (seat == null) {
             throw new InvalidTokenException();
         }
 
-        cinemaRoom.getAvailableSeats().add(seat);
+        cinemaRoomRepository.getAvailableSeats().add(seat);
         return seat;
     }
 
     private boolean isSeatValid(Seat seat) {
-        return !(seat.getRow() > cinemaRoom.getTotalRows()
-                || seat.getColumn() > cinemaRoom.getTotalColumns()
-                || seat.getRow() < 1
-                || seat.getColumn() < 1);
+        return !(seat.row() > cinemaRoomRepository.getTotalRows()
+                || seat.column() > cinemaRoomRepository.getTotalColumns()
+                || seat.row() < 1
+                || seat.column() < 1);
     }
 }
