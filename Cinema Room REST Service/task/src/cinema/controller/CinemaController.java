@@ -48,6 +48,7 @@ public class CinemaController {
         return new TicketRefundResponse(seat);
     }
 
+    
     @PostMapping("/stats")
     public StatisticsResponse stats(@RequestParam(required = false) String password) {
         if (password != null && password.equals(secret)) {
